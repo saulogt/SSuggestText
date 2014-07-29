@@ -12,6 +12,8 @@
 #import "SSuggestDelegate.h"
 #import "SSuggestDatasource.h"
 
+
+
 @interface SSuggestText : UITextField<NSObject>
 
 @property (nonatomic, weak) NSObject<SSuggestDelegate>* suggestDelegate;
