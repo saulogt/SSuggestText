@@ -7,6 +7,8 @@
 //
 
 #import "STViewController.h"
+#include <SSuggestText/SSuggestText.h>
+
 
 @interface STViewController ()
 
