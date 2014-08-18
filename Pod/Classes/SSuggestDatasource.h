@@ -6,9 +6,13 @@
 //  Copyright (c) 2014 Saulo G Tauil. All rights reserved.
 //
 
+#import <Foundation/Foundation.h>
+
+@class SSuggestText;
+
 @protocol SSuggestDatasource <NSObject>
 
--(NSInteger) count;
--(NSString*) textAtIndexPath: (NSIndexPath*) indexPath;
+-(NSInteger) countInSuggestText: (SSuggestText*) suggestText;
+-(NSString*) suggestText:(SSuggestText*) suggestText textAtIndexPath: (NSIndexPath*) indexPath;
 
 @end

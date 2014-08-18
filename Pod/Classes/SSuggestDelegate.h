@@ -8,8 +8,10 @@
 
 #import <Foundation/Foundation.h>
 
+@class SSuggestText;
+
 @protocol SSuggestDelegate<NSObject>
 
--(void) tagSelected : (NSIndexPath*) indexPath displayString: (NSString*) displayString;
+-(void) suggestText: (SSuggestText*) suggestText tagSelected : (NSIndexPath*) indexPath displayString: (NSString*) displayString;
 
 @end

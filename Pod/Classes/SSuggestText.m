@@ -22,7 +22,7 @@
 
 
 - (void)matchStrings:(NSString *)letters {
-    if ([self.dataSource count] > 0) {
+    if ([self.dataSource countInSuggestText:nil] > 0) {
         /*
         self.matchedStrings = [_stringsArray
                                filteredArrayUsingPredicate:
@@ -107,13 +107,13 @@
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault
                                       reuseIdentifier:CellIdentifier];
     }
-    cell.textLabel.text = [self.dataSource textAtIndexPath: indexPath];
+    cell.textLabel.text = [self.dataSource suggestText: nil textAtIndexPath: indexPath];
     return cell;
 }
 
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    return ([self.dataSource count]);
+    return ([self.dataSource countInSuggestText: nil]);
 
 }
 
