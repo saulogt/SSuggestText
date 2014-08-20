@@ -12,9 +12,6 @@
 #import "SSuggestText.h"
 #import "SSuggestCell.h"
 
-static NSString* const keyModelId = @"mintACV_id";
-
-
 @interface TextViewDelegate : NSObject<UITextViewDelegate>
 
 -(BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text;
@@ -40,16 +37,16 @@ static NSString* const keyModelId = @"mintACV_id";
 
 @implementation TextViewDelegate
 
+
 -(BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text
 {
     SSuggestText* textV = (SSuggestText*)textView;
     return [textV shouldChangeTextInRange:range replacementText:text];
 }
 
-
+//text changed
 - (void)textViewDidChange:(UITextView *)textView
 {
-    // Checking User trying to remove MintAnnotationView's annoatation
     SSuggestText* textV = (SSuggestText*)textView;
     [textV textViewDidChange:textView];
     
@@ -58,7 +55,7 @@ static NSString* const keyModelId = @"mintACV_id";
 
 @end
 
-
+static NSString* const dataKeySuggest = @"suggestDataKey";
 
 @implementation SSuggestText
 
@@ -229,7 +226,7 @@ TextViewDelegate* textViewDelegate;
     
     // 3. Find and draw
     
-    [self.attributedText enumerateAttribute:keyModelId inRange:NSMakeRange(0, self.attributedText.length)
+    [self.attributedText enumerateAttribute:dataKeySuggest inRange:NSMakeRange(0, self.attributedText.length)
                                     options:0 usingBlock:^(id value, NSRange range, BOOL *stop) {
                                         
                                         if ([self annotationForId:value]){
@@ -372,7 +369,8 @@ TextViewDelegate* textViewDelegate;
         
         if ([annotation.tagId isEqualToString:newAnnoation.tagId])
         {
-            //            NSLog(@"MintAnnoationChatView >> addAnoation >> id'%@'is aleady in", newAnnoation.tagId);
+
+            
             return;
         }
     }
@@ -383,7 +381,7 @@ TextViewDelegate* textViewDelegate;
     
     // Insert Plain user name text
     NSMutableDictionary *attr = [[NSMutableDictionary alloc] initWithDictionary:[self defaultAttributedString]];
-    [attr setObject:newAnnoation.tagId forKey:keyModelId];
+    [attr setObject:newAnnoation.tagId forKey:dataKeySuggest];
     NSMutableAttributedString *nameString = [[NSMutableAttributedString alloc]
                                              initWithString:[NSString stringWithFormat:@"%@", newAnnoation.tagDesc]
                                              attributes:attr];
@@ -444,7 +442,7 @@ TextViewDelegate* textViewDelegate;
 {
     
     __block NSRange stringRange = NSMakeRange(0, 0);
-    [self.attributedText enumerateAttribute:keyModelId inRange:NSMakeRange(0, self.attributedText.length-1)
+    [self.attributedText enumerateAttribute:dataKeySuggest inRange:NSMakeRange(0, self.attributedText.length-1)
                                     options:0 usingBlock:^(id value, NSRange range, BOOL *stop) {
                                         
                                         if ([value isEqualToString:annoation.tagId])
@@ -532,7 +530,7 @@ TextViewDelegate* textViewDelegate;
         
         [self.attributedText enumerateAttributesInRange:rangeOfCheckingEditingInTag options:0 usingBlock:^(NSDictionary *attrs, NSRange range, BOOL *stop) {
             
-            if ([attrs objectForKey:keyModelId] && [self annotationForId:[attrs objectForKey:keyModelId]])
+            if ([attrs objectForKey:dataKeySuggest] && [self annotationForId:[attrs objectForKey:dataKeySuggest]])
             {
                 NSLog(@"------- Editing In Tag");
                 result = NO;
@@ -565,17 +563,17 @@ TextViewDelegate* textViewDelegate;
         
         [self.attributedText enumerateAttributesInRange:editingRange options:0 usingBlock:^(NSDictionary *attrs, NSRange range, BOOL *stop) {
             
-            if ([attrs objectForKey:keyModelId] && [self annotationForId:[attrs objectForKey:keyModelId]])
+            if ([attrs objectForKey:dataKeySuggest] && [self annotationForId:[attrs objectForKey:dataKeySuggest]])
             {
                 
-                NSRange tagRange = [self findTagPosition:[self annotationForId:[attrs objectForKey:keyModelId]]];
+                NSRange tagRange = [self findTagPosition:[self annotationForId:[attrs objectForKey:dataKeySuggest]]];
                 
-                //                NSLog(@"Deleted annotation tag >>>>> id(%@):range(%d,%d)",[attrs objectForKey:keyModelId], tagRange.location, tagRange.length);
+                //                NSLog(@"Deleted annotation tag >>>>> id(%@):range(%d,%d)",[attrs objectForKey:dataKeySuggest], tagRange.location, tagRange.length);
                 
                 self.attributedText = [self attributedStringWithCutOutOfRange:tagRange];
                 self.selectedRange = NSMakeRange(tagRange.location, 0);
                 
-                [self.annotationList removeObject:[self annotationForId:[attrs objectForKey:keyModelId]]];
+                [self.annotationList removeObject:[self annotationForId:[attrs objectForKey:dataKeySuggest]]];
                 [self setNeedsDisplay];
             }
             
@@ -687,7 +685,7 @@ TextViewDelegate* textViewDelegate;
     NSMutableAttributedString *workingStr = [[NSMutableAttributedString alloc] initWithAttributedString:self.attributedText];
     
     // Finding Replace ranges and annoations
-    [workingStr enumerateAttribute:keyModelId inRange:NSMakeRange(0, workingStr.string.length) options:0
+    [workingStr enumerateAttribute:dataKeySuggest inRange:NSMakeRange(0, workingStr.string.length) options:0
                         usingBlock:^(id value, NSRange range, BOOL *stop) {
                             
                             SSuggestTag *annoation = nil;
@@ -709,7 +707,7 @@ TextViewDelegate* textViewDelegate;
 - (void) clearAllAttributedStrings
 {
     NSMutableAttributedString *attributedString = [[NSMutableAttributedString alloc] initWithAttributedString:self.attributedText];
-    [attributedString removeAttribute: keyModelId range: NSMakeRange(0, self.text.length)];
+    [attributedString removeAttribute: dataKeySuggest range: NSMakeRange(0, self.text.length)];
     [self.annotationList removeAllObjects];
     [self setNeedsDisplay];
     //    NSLog(@"cleared attributes!");
