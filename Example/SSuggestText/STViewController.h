@@ -7,7 +7,10 @@
 //
 
 #import <UIKit/UIKit.h>
+#include <SSuggestText/SSuggestText.h>
 
 @interface STViewController : UIViewController
+
+@property (weak, nonatomic) IBOutlet SSuggestText *suggestText;
 
 @end

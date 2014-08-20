@@ -11,13 +11,14 @@
 #import <QuartzCore/QuartzCore.h>
 #import "SSuggestText.h"
 #import "SSuggestCell.h"
+#import "SSuggestTextDelegate.h"
 
-@interface TextViewDelegate : NSObject<UITextViewDelegate>
 
--(BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text;
-
-@end
-
+#ifdef DEBUG
+#   define NSLogD(...) NSLog(__VA_ARGS__)
+#else
+#   define NSLogD(...)
+#endif
 
 @interface SSuggestText()<UITableViewDelegate, UITableViewDataSource>
 
@@ -28,30 +29,7 @@
 
 @property (nonatomic) NSArray* filteredTags;
 
-@property (nonatomic) NSString* searchText;
-
--(BOOL) shouldChangeTextInRange:(NSRange) editRange replacementText: (NSString*) text;
-
-@end
-
-
-@implementation TextViewDelegate
-
-
--(BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text
-{
-    SSuggestText* textV = (SSuggestText*)textView;
-    return [textV shouldChangeTextInRange:range replacementText:text];
-}
-
-//text changed
-- (void)textViewDidChange:(UITextView *)textView
-{
-    SSuggestText* textV = (SSuggestText*)textView;
-    [textV textViewDidChange:textView];
-    
-}
-
+//@property (nonatomic) NSString* searchText;
 
 @end
 
@@ -59,7 +37,7 @@ static NSString* const dataKeySuggest = @"suggestDataKey";
 
 @implementation SSuggestText
 
-TextViewDelegate* textViewDelegate;
+SSuggestTextDelegate* textViewDelegate;
 
 @synthesize tableVC = _tableVC;
 
@@ -74,6 +52,8 @@ TextViewDelegate* textViewDelegate;
         
         [self.tableVC.tableView reloadData];
     }
+    
+    NSLogD(@"letters: '%@', filteredCount: %d", letters, self.filteredTags.count);
 }
 
 - (void)showPopOverList {
@@ -117,15 +97,24 @@ TextViewDelegate* textViewDelegate;
         }
     }
 }
+//
+//-(NSString *)searchText
+//{
+//    if (_searchText == nil)
+//    {
+//        _searchText = [[NSMutableString alloc] init];
+//    }
+//    return _searchText;
+//}
 
 #pragma mark - setup
 
 -(void) setup{
     
     self.contentMode = UIViewContentModeRedraw;
-    self.annotationList = [[NSMutableArray alloc] init];
+    self.tagList = [[NSMutableArray alloc] init];
     
-    self.delegate = textViewDelegate = [[TextViewDelegate alloc] init];
+    self.delegate = textViewDelegate = [[SSuggestTextDelegate alloc] init];
     self.autocorrectionType = UITextAutocorrectionTypeNo;
     self.poc =
     [[UIPopoverController alloc] initWithContentViewController:self.tableVC];
@@ -204,7 +193,7 @@ TextViewDelegate* textViewDelegate;
     
     NSAssert([tagSelected isKindOfClass:[SSuggestTag class]], @"invalid tag type");
     
-    [self addAnnotation: tagSelected];
+    [self addTag: tagSelected];
     
     [self.poc dismissPopoverAnimated:YES];
 }
@@ -222,14 +211,14 @@ TextViewDelegate* textViewDelegate;
         [tagView removeFromSuperview];
     }
     
-    if (self.annotationList == nil || self.attributedText.length  < 1) return;
+    if (self.tagList == nil || self.attributedText.length  < 1) return;
     
     // 3. Find and draw
     
     [self.attributedText enumerateAttribute:dataKeySuggest inRange:NSMakeRange(0, self.attributedText.length)
                                     options:0 usingBlock:^(id value, NSRange range, BOOL *stop) {
                                         
-                                        if ([self annotationForId:value]){
+                                        if ([self tagForId:value]){
                                             //                                            NSLog(@"%d, %d",range.location, range.length);
                                             CFRange cfRange = CFRangeMake(range.location, range.length);
                                             [self calculatingTagRectAndDraw:cfRange];
@@ -241,7 +230,7 @@ TextViewDelegate* textViewDelegate;
     
 }
 
-- (void) calculatingTagRectAndDraw:(CFRange) annoationStringRange
+- (void) calculatingTagRectAndDraw:(CFRange) tagStringRange
 {
     /*
      Caclulating Rect and Draw
@@ -253,7 +242,7 @@ TextViewDelegate* textViewDelegate;
     UITextView *textView = self;
     
     // 4) Find rect
-    CFRange stringRange = annoationStringRange;
+    CFRange stringRange = tagStringRange;
     UITextPosition *begin = [textView positionFromPosition:textView.beginningOfDocument offset:stringRange.location];
     UITextPosition *end = [textView positionFromPosition:begin offset:stringRange.length];
     UITextRange *textRange = [textView textRangeFromPosition:begin toPosition:end];
@@ -358,16 +347,36 @@ TextViewDelegate* textViewDelegate;
     [self addSubview:tagButton];
 }
 
+-(void) recreateAttributedStringByTags
+{
+    NSMutableAttributedString* attrString = [[NSMutableAttributedString alloc] init];
+    
+    NSMutableAttributedString *space = [[NSMutableAttributedString alloc]
+                                             initWithString: @" "
+                                             attributes:[self defaultAttributedString]];
 
-#pragma mark - Modeling
+    
+    for (SSuggestTag* tag in self.tagList) {
+        NSMutableDictionary *attr = [[NSMutableDictionary alloc] initWithDictionary:[self defaultAttributedString]];
+        [attr setObject: tag.tagId forKey:dataKeySuggest];
+        NSMutableAttributedString *nameString = [[NSMutableAttributedString alloc]
+                                                 initWithString:[NSString stringWithFormat:@"%@", tag.tagDesc]
+                                                 attributes:attr];
+        [nameString appendAttributedString: space];
+        
+        [attrString appendAttributedString: nameString];
+    }
+    self.attributedText = attrString;
+}
 
-// --- NEW ---
-- (void)addAnnotation:(SSuggestTag *)newAnnoation
+#pragma mark - adding Tag
+
+- (void)addTag:(SSuggestTag *)newtag
 {
     // Check aleady imported
-    for (SSuggestTag *annotation in self.annotationList) {
+    for (SSuggestTag *tag in self.tagList) {
         
-        if ([annotation.tagId isEqualToString:newAnnoation.tagId])
+        if ([tag.tagId isEqualToString:newtag.tagId])
         {
 
             
@@ -376,14 +385,19 @@ TextViewDelegate* textViewDelegate;
     }
     
     // Add
-    if (!self.annotationList) self.annotationList = [[NSMutableArray alloc] init];
-    [self.annotationList addObject:newAnnoation];
+    if (!self.tagList) self.tagList = [[NSMutableArray alloc] init];
+    [self.tagList addObject:newtag];
     
+    [self recreateAttributedStringByTags];
+    
+    //self.searchText = nil;
+    
+     /*
     // Insert Plain user name text
     NSMutableDictionary *attr = [[NSMutableDictionary alloc] initWithDictionary:[self defaultAttributedString]];
-    [attr setObject:newAnnoation.tagId forKey:dataKeySuggest];
+    [attr setObject:newtag.tagId forKey:dataKeySuggest];
     NSMutableAttributedString *nameString = [[NSMutableAttributedString alloc]
-                                             initWithString:[NSString stringWithFormat:@"%@", newAnnoation.tagDesc]
+                                             initWithString:[NSString stringWithFormat:@"%@", newtag.tagDesc]
                                              attributes:attr];
     
     NSMutableAttributedString *spaceStringPefix = nil;
@@ -392,6 +406,8 @@ TextViewDelegate* textViewDelegate;
     //    NSLog(@"nameString:%@",nameString);
     
     
+    
+   
     NSInteger cursor = self.selectedRange.location;
     // display name
     
@@ -429,7 +445,7 @@ TextViewDelegate* textViewDelegate;
     {
         self.attributedText = [self attributedStringInsertString:nameString at:cursor];
     }
-    
+    */
     
     [self setNeedsDisplay];
     
@@ -438,14 +454,14 @@ TextViewDelegate* textViewDelegate;
         [self.delegate textViewDidChange:self];
 }
 
-- (NSRange) findTagPosition:(SSuggestTag*)annoation
+- (NSRange) findTagPosition:(SSuggestTag*)tag
 {
     
     __block NSRange stringRange = NSMakeRange(0, 0);
     [self.attributedText enumerateAttribute:dataKeySuggest inRange:NSMakeRange(0, self.attributedText.length-1)
                                     options:0 usingBlock:^(id value, NSRange range, BOOL *stop) {
                                         
-                                        if ([value isEqualToString:annoation.tagId])
+                                        if ([value isEqualToString:tag.tagId])
                                         {
                                             stringRange = range;
                                             //                                            stringRange = CFRangeMake(range.location, range.location + range.length);
@@ -457,15 +473,45 @@ TextViewDelegate* textViewDelegate;
     
 }
 
-- (SSuggestTag *) annotationForId:(NSString*)tagId
+- (SSuggestTag *) tagForId:(NSString*)tagId
 {
-    for (SSuggestTag *annotation in self.annotationList) {
+    for (SSuggestTag *tag in self.tagList) {
         
-        if ([annotation.tagId isEqualToString:tagId])
-            return annotation;
+        if ([tag.tagId isEqualToString:tagId])
+            return tag;
     }
     
     return nil;
+}
+
+-(NSString*) getSearch
+{
+    
+    NSMutableString* search = [[NSMutableString alloc] init];
+    NSAttributedString* str = self.attributedText;
+    [str enumerateAttributesInRange: NSMakeRange(0, str.length) options:0 usingBlock:^(NSDictionary *attrs, NSRange range, BOOL *stop) {
+        
+        if ([attrs objectForKey:dataKeySuggest] == nil)
+        {
+            NSString* substring = [str.string substringWithRange: range];
+            ;
+            if ([[search stringByTrimmingCharactersInSet:
+                  [NSCharacterSet whitespaceCharacterSet]] isEqualToString:@""] &&
+                [[substring stringByTrimmingCharactersInSet:
+                  [NSCharacterSet whitespaceCharacterSet]] isEqualToString:@""]
+                )
+            {
+               //
+            }
+            else
+            {
+                [search appendString: substring];
+            }
+        }
+        
+    }];
+    return [search stringByTrimmingCharactersInSet:
+    [NSCharacterSet whitespaceCharacterSet]] ;
 }
 
 #pragma mark - UITextviewDelegate
@@ -474,35 +520,47 @@ TextViewDelegate* textViewDelegate;
 {
     [self setNeedsDisplay];
     
+    NSLogD(@"textViewDidChange... attributtedString: %@", self.attributedText.string);
     // length = 0, but attributed have id
     if (self.attributedText.string.length == 0)
     {
         [self clearAllAttributedStrings];
     }
     
+    ///TODO: determine when it should appear
+    
+    [self matchStrings: [self getSearch]];
+    [self showPopOverList];
+    
     return;
     
 }
+
+
 
 - (BOOL) shouldChangeTextInRange:(NSRange)editingRange replacementText:(NSString *)text
 {
     
     __block BOOL result = YES;
     
+    //NSString* textContent = [self.searchText stringByReplacingCharactersInRange:editingRange withString:text];
     
-    ///TODO: determine when it should appear
-    [self matchStrings:text];
-    [self showPopOverList];
+    NSLogD(@"shdChgTxtInRng '%@' text:%@ , loc:%d , len:%d", self.text , text , editingRange.location , editingRange.length);
     
     // ALl clear
     if (editingRange.location == 0 && editingRange.length == self.attributedText.string.length)
     {
-        //        NSLog(@"<<<<<< --- all cleared by keyboard");
+
+
+        
         [self clearAll];
+        
+
+        
         return YES;
     }
     
-    // Checking Trying to insert within tag
+    // Checking to insert within tag
     if (text.length > 0)
     {
         NSRange rangeOfCheckingEditingInTag = editingRange;
@@ -512,8 +570,7 @@ TextViewDelegate* textViewDelegate;
             rangeOfCheckingEditingInTag.location-=1;
             
             //            NSLog(@"<<<<< ----------- 1");
-            
-            //
+
             NSInteger totalLength = rangeOfCheckingEditingInTag.location + rangeOfCheckingEditingInTag.length;
             if (totalLength > self.attributedText.length)
             {
@@ -530,7 +587,7 @@ TextViewDelegate* textViewDelegate;
         
         [self.attributedText enumerateAttributesInRange:rangeOfCheckingEditingInTag options:0 usingBlock:^(NSDictionary *attrs, NSRange range, BOOL *stop) {
             
-            if ([attrs objectForKey:dataKeySuggest] && [self annotationForId:[attrs objectForKey:dataKeySuggest]])
+            if ([attrs objectForKey:dataKeySuggest] && [self tagForId:[attrs objectForKey:dataKeySuggest]])
             {
                 NSLog(@"------- Editing In Tag");
                 result = NO;
@@ -538,12 +595,12 @@ TextViewDelegate* textViewDelegate;
             
         }];
         
-        
         return result;
     }
     // Deleting
     else
     {
+
         editingRange.location-=1;
         if (editingRange.location == -1)
             editingRange.location = 0;
@@ -563,17 +620,17 @@ TextViewDelegate* textViewDelegate;
         
         [self.attributedText enumerateAttributesInRange:editingRange options:0 usingBlock:^(NSDictionary *attrs, NSRange range, BOOL *stop) {
             
-            if ([attrs objectForKey:dataKeySuggest] && [self annotationForId:[attrs objectForKey:dataKeySuggest]])
+            if ([attrs objectForKey:dataKeySuggest] && [self tagForId:[attrs objectForKey:dataKeySuggest]])
             {
                 
-                NSRange tagRange = [self findTagPosition:[self annotationForId:[attrs objectForKey:dataKeySuggest]]];
+                NSRange tagRange = [self findTagPosition:[self tagForId:[attrs objectForKey:dataKeySuggest]]];
                 
-                //                NSLog(@"Deleted annotation tag >>>>> id(%@):range(%d,%d)",[attrs objectForKey:dataKeySuggest], tagRange.location, tagRange.length);
+                //                NSLog(@"Deleted tag tag >>>>> id(%@):range(%d,%d)",[attrs objectForKey:dataKeySuggest], tagRange.location, tagRange.length);
                 
                 self.attributedText = [self attributedStringWithCutOutOfRange:tagRange];
                 self.selectedRange = NSMakeRange(tagRange.location, 0);
                 
-                [self.annotationList removeObject:[self annotationForId:[attrs objectForKey:dataKeySuggest]]];
+                [self.tagList removeObject:[self tagForId:[attrs objectForKey:dataKeySuggest]]];
                 [self setNeedsDisplay];
             }
             
@@ -679,36 +736,12 @@ TextViewDelegate* textViewDelegate;
     return NO;
 }
 
-- (NSString*) makeStringWithoutTagString
-{
-    
-    NSMutableAttributedString *workingStr = [[NSMutableAttributedString alloc] initWithAttributedString:self.attributedText];
-    
-    // Finding Replace ranges and annoations
-    [workingStr enumerateAttribute:dataKeySuggest inRange:NSMakeRange(0, workingStr.string.length) options:0
-                        usingBlock:^(id value, NSRange range, BOOL *stop) {
-                            
-                            SSuggestTag *annoation = nil;
-                            if (value){
-                                annoation = [self annotationForId:value];
-                            }
-                            
-                            if (annoation){
-                                [workingStr replaceCharactersInRange:range withString:@""];
-                                
-                            }
-                            
-                        }];
-    
-    return workingStr.string;
-    
-}
 
 - (void) clearAllAttributedStrings
 {
     NSMutableAttributedString *attributedString = [[NSMutableAttributedString alloc] initWithAttributedString:self.attributedText];
     [attributedString removeAttribute: dataKeySuggest range: NSMakeRange(0, self.text.length)];
-    [self.annotationList removeAllObjects];
+    [self.tagList removeAllObjects];
     [self setNeedsDisplay];
     //    NSLog(@"cleared attributes!");
 }
@@ -716,6 +749,7 @@ TextViewDelegate* textViewDelegate;
 
 - (void)clearAll
 {
+    
     [self clearAllAttributedStrings];
     self.attributedText = [[NSAttributedString alloc]initWithString:@"" attributes:[self defaultAttributedString]];
     [self setNeedsDisplay];

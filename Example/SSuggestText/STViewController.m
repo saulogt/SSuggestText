@@ -7,12 +7,8 @@
 //
 
 #import "STViewController.h"
-#include <SSuggestText/SSuggestText.h>
-
 
 @interface STViewController ()
-
-@property (weak, nonatomic) IBOutlet SSuggestText *suggestText;
 
 @property (nonatomic) NSArray* val;
 
@@ -33,7 +29,8 @@
 }
 
 - (IBAction)btnClicked:(id)sender {
-    NSArray* tags = self.suggestText.annotationList;
+    NSArray* tags = self.suggestText.tagList;
+    NSLog(@"%@", tags);
 }
 
 - (void)didReceiveMemoryWarning

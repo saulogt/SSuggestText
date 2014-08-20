@@ -15,7 +15,7 @@
 
 @property (nonatomic) UIColor        *nameTagColor;
 @property (nonatomic) UIColor        *nameTagLineColor;
-@property (nonatomic) NSMutableArray *annotationList;
+@property (nonatomic) NSMutableArray *tagList;
 @property (nonatomic) UIImage        *nameTagImage;
 
 @property (nonatomic) NSArray* possibleTags;
@@ -23,20 +23,19 @@
 // info should include 'SSuggestTagInfoID', 'SSuggestTagInfoName'
 //              SSuggestTagInfoID   = Unique Identifier to disturb dobule inserting same info.
 //              SSuggestTagInfoName = Appeared name in view.
-- (void) addAnnotation:(SSuggestTag*)annoatin;
+- (void) addTag:(SSuggestTag*)tag;
 
 /*
- Make s tring without tag strign
- ex ) hi good mornig.  (removed 'Sally' annotation tag text)
- */
-- (NSString*) makeStringWithoutTagString;
-
-
-/*
- remove text and attributes and annotationList
+ remove text and attributes and tagList
  */
 - (void) clearAll;
 
+
+
+
+#pragma mark - internal usage
+
+-(BOOL) shouldChangeTextInRange:(NSRange) editRange replacementText: (NSString*) text;
 
 
 @end
