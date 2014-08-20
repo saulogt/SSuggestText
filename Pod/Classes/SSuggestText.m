@@ -10,7 +10,7 @@
 #import <UIKit/UIKit.h>
 #import <QuartzCore/QuartzCore.h>
 #import "SSuggestText.h"
-#import "SupportFiles/SSuggestCell.h"
+#import "SSuggestCell.h"
 
 static NSString* const keyModelId = @"mintACV_id";
 
