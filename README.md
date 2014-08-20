@@ -16,11 +16,11 @@ To run the example project, clone the repo, and run `pod install` from the Examp
 SSuggestText is available through [CocoaPods](http://cocoapods.org). To install
 it, simply add the following line to your Podfile:
 
-    pod "SSuggestText"
+    pod "SSuggestText", :git => "https://github.com/saulogt/SSuggestText.git"
 
 ## Author
 
-saulogt, saulogt@gmail.com
+saulogt, saulogt@hotmail.com
 
 ## License
 
