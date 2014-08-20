@@ -22,10 +22,10 @@ Pod::Spec.new do |s|
   s.social_media_url = 'https://twitter.com/saulogt'
 
   s.platform     = :ios, '7.0'
-  s.requires_arc = true
+  s.requires_arc = true		
 
   s.source_files = 'Pod/Classes'
-  s.resources = 'Pod/Assets/*.xcassets'
+  s.resources = 'Pod/Assets/SSuggestText.xcassets/*/*.{png,json}'
 
   s.public_header_files = 'Pod/Classes/**/*.h'
   s.frameworks = 'UIKit', 'MapKit'
