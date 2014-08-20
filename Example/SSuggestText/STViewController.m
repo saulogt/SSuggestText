@@ -10,7 +10,7 @@
 #include <SSuggestText/SSuggestText.h>
 
 
-@interface STViewController ()<SSuggestDatasource>
+@interface STViewController ()
 
 @property (weak, nonatomic) IBOutlet SSuggestText *suggestText;
 
@@ -24,8 +24,16 @@
 {
     [super viewDidLoad];
 	// Do any additional setup after loading the view, typically from a nib.
-    self.suggestText.dataSource = self;
+    self.suggestText.possibleTags = self.val;
     
+    self.suggestText.nameTagImage = [UIImage imageNamed: @"tagImageSample"];
+    
+   // [self.suggestText addAnnotation:[SSuggestTag tagDataWithDesc: @"AAAAAA" AndId: @"1000"]];
+
+}
+
+- (IBAction)btnClicked:(id)sender {
+    NSArray* tags = self.suggestText.annotationList;
 }
 
 - (void)didReceiveMemoryWarning
@@ -34,23 +42,19 @@
     // Dispose of any resources that can be recreated.
 }
 
-
-
--(NSInteger)countInSuggestText:(SSuggestText *)suggestText
-{
-    return self.val.count;
-}
-
--(NSString *)suggestText:(SSuggestText *)suggestText textAtIndexPath:(NSIndexPath *)indexPath
-{
-    return self.val[indexPath.row];
-}
-
 -(NSArray *)val
 {
     if (_val == nil)
     {
-        _val = @[@"acdf", @"erdfc", @"abcde", @"zzxse", @"ewsd"];
+        _val = @[@{@"id" : @"1", @"desc" :@"acdf"},
+                 @{@"id" : @"2", @"desc" :@"erdfc"},
+                 @{@"id" : @"3", @"desc" :@"abcde"},
+                 @{@"id" : @"4", @"desc" :@"zzxse"},
+                 @{@"id" : @"5", @"desc" :@"ewsd"},
+                 @{@"id" : @"6", @"desc" :@"obcetdg"},
+                 @{@"id" : @"7", @"desc" :@"gg tres"},
+                 @{@"id" : @"8", @"desc" :@"abffdretu uuyd"},
+                 ];
     }
     return _val;
 }

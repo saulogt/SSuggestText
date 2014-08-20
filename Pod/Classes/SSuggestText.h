@@ -1,24 +1,42 @@
 //
-//  SSuggestText.h
+//  STAppDelegate.h
 //  SSuggestText
 //
-//  Created by Saulo G Tauil on 23/07/14.
-//  Copyright (c) 2014 Saulo G Tauil. All rights reserved.
+//  Created by CocoaPods on 08/17/2014.
+//  Copyright (c) 2014 saulogt. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 
-#import "SSuggestDelegate.h"
-#import "SSuggestDatasource.h"
+#import "SSuggestTag.h"
+
+@interface SSuggestText : UITextView <UITextViewDelegate>
+
+@property (nonatomic) UIColor        *nameTagColor;
+@property (nonatomic) UIColor        *nameTagLineColor;
+@property (nonatomic) NSMutableArray *annotationList;
+@property (nonatomic) UIImage        *nameTagImage;
+
+@property (nonatomic) NSArray* possibleTags;
+// Add new Anotation
+// info should include 'SSuggestTagInfoID', 'SSuggestTagInfoName'
+//              SSuggestTagInfoID   = Unique Identifier to disturb dobule inserting same info.
+//              SSuggestTagInfoName = Appeared name in view.
+- (void) addAnnotation:(SSuggestTag*)annoatin;
+
+/*
+ Make s tring without tag strign
+ ex ) hi good mornig.  (removed 'Sally' annotation tag text)
+ */
+- (NSString*) makeStringWithoutTagString;
 
 
+/*
+ remove text and attributes and annotationList
+ */
+- (void) clearAll;
 
-@interface SSuggestText : UITextField<NSObject>
 
-@property (nonatomic, weak) NSObject<SSuggestDelegate>* suggestDelegate;
-@property (nonatomic, weak) NSObject<SSuggestDatasource>* dataSource;
-
-@property (nonatomic) BOOL acceptMultipleTags;
 
 @end
