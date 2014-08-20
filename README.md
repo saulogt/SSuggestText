@@ -26,3 +26,6 @@ saulogt, saulogt@hotmail.com
 
 SSuggestText is available under the MIT license. See the LICENSE file for more info.
 
+## Reference
+
+I got some good ideas this project from https://github.com/soleaf/MintAnnotationView
