@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		248AB96C56864E63B97C9664 /* libPods-Tests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B7A8E96844694198AB6D3A5C /* libPods-Tests.a */; };
+		2754CB9719ABE908007AD0B9 /* PhotoScreenViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2754CB9619ABE908007AD0B9 /* PhotoScreenViewController.m */; };
 		3046BA61257A484D903CAB1B /* libPods-SSuggestText.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BAE5C921FA084B0CBADE8AA3 /* libPods-SSuggestText.a */; };
 		6003F58E195388D20070C39A /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6003F58D195388D20070C39A /* Foundation.framework */; };
 		6003F590195388D20070C39A /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6003F58F195388D20070C39A /* CoreGraphics.framework */; };
@@ -38,6 +39,8 @@
 
 /* Begin PBXFileReference section */
 		26FC04C94B698F0FC9F98107 /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = README.md; path = ../README.md; sourceTree = "<group>"; };
+		2754CB9519ABE908007AD0B9 /* PhotoScreenViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PhotoScreenViewController.h; sourceTree = "<group>"; };
+		2754CB9619ABE908007AD0B9 /* PhotoScreenViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PhotoScreenViewController.m; sourceTree = "<group>"; };
 		6003F58A195388D20070C39A /* SSuggestText.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SSuggestText.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6003F58D195388D20070C39A /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		6003F58F195388D20070C39A /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -139,6 +142,8 @@
 				6003F5A6195388D20070C39A /* STViewController.m */,
 				6003F5A8195388D20070C39A /* Images.xcassets */,
 				6003F594195388D20070C39A /* Supporting Files */,
+				2754CB9519ABE908007AD0B9 /* PhotoScreenViewController.h */,
+				2754CB9619ABE908007AD0B9 /* PhotoScreenViewController.m */,
 			);
 			path = SSuggestText;
 			sourceTree = "<group>";
@@ -352,6 +357,7 @@
 				6003F59E195388D20070C39A /* STAppDelegate.m in Sources */,
 				6003F5A7195388D20070C39A /* STViewController.m in Sources */,
 				6003F59A195388D20070C39A /* main.m in Sources */,
+				2754CB9719ABE908007AD0B9 /* PhotoScreenViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

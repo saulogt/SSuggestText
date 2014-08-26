@@ -26,5 +26,33 @@
     [(SSuggestText*)textView textViewDidChange:textView];
 }
 
+-(void)textViewDidBeginEditing:(UITextView *)textView
+{
+    NSLog(@"textViewDidBeginEditing");
+}
+
+-(void)textViewDidEndEditing:(UITextView *)textView
+{
+    NSLog(@"textViewDidEndEditing");
+    
+}
+
+-(void)textViewDidChangeSelection:(UITextView *)textView
+{
+    NSLog(@"textViewDidChangeSelection");
+    
+}
+
+/*
+-(BOOL)textViewShouldBeginEditing:(UITextView *)textView
+{
+    return YES;
+}
+
+-(BOOL)textViewShouldEndEditing:(UITextView *)textView
+{
+    return YES;
+}
+ */
 
 @end

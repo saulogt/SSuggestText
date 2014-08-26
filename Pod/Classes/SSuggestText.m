@@ -31,15 +31,18 @@
 
 //@property (nonatomic) NSString* searchText;
 
+@property (nonatomic) SSuggestTextDelegate* textViewDelegate;
+
+@property (nonatomic) NSString* partialSeach;
+
 @end
 
 static NSString* const dataKeySuggest = @"suggestDataKey";
 
 @implementation SSuggestText
 
-SSuggestTextDelegate* textViewDelegate;
-
 @synthesize tableVC = _tableVC;
+@synthesize possibleTags = _possibleTags;
 
 #pragma mark - popup
 
@@ -58,7 +61,7 @@ SSuggestTextDelegate* textViewDelegate;
 
 - (void)showPopOverList {
     
-    if (self.filteredTags.count == 0){
+    if (self.filteredTags.count == 0 && !self.enableTagCreation){
         [_poc dismissPopoverAnimated:YES];
     } else if (!_poc.isPopoverVisible) {
         [_poc presentPopoverFromRect:self.frame
@@ -97,6 +100,16 @@ SSuggestTextDelegate* textViewDelegate;
         }
     }
 }
+
+-(NSArray *)possibleTags
+{
+    if (_possibleTags == nil)
+    {
+        _possibleTags = [[NSMutableArray alloc] init];
+    }
+    return _possibleTags;
+}
+
 //
 //-(NSString *)searchText
 //{
@@ -114,7 +127,7 @@ SSuggestTextDelegate* textViewDelegate;
     self.contentMode = UIViewContentModeRedraw;
     self.tagList = [[NSMutableArray alloc] init];
     
-    self.delegate = textViewDelegate = [[SSuggestTextDelegate alloc] init];
+    self.delegate = self.textViewDelegate = [[SSuggestTextDelegate alloc] init];
     self.autocorrectionType = UITextAutocorrectionTypeNo;
     self.poc =
     [[UIPopoverController alloc] initWithContentViewController:self.tableVC];
@@ -162,42 +175,99 @@ SSuggestTextDelegate* textViewDelegate;
 
 -(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    static NSString* CellIdentifier = @"Cell";
-    SSuggestCell* cell = (SSuggestCell*)[tableView dequeueReusableCellWithIdentifier:CellIdentifier] ;//] forIndexPath:indexPath];
-    
-    NSAssert([cell isKindOfClass:[SSuggestCell class]], @"invalid cell type");
-    
-    if (cell == nil) {
-        cell = [[SSuggestCell alloc] initWithStyle:UITableViewCellStyleDefault
-                                   reuseIdentifier:CellIdentifier];
+    if (indexPath.section == 1){
+        static NSString* CellIdentifier = @"Cell";
+        SSuggestCell* cell = (SSuggestCell*)[tableView dequeueReusableCellWithIdentifier:CellIdentifier forIndexPath:indexPath] ;
+        
+        NSAssert([cell isKindOfClass:[SSuggestCell class]], @"invalid cell type");
+        
+        if (cell == nil) {
+            cell = [[SSuggestCell alloc] initWithStyle:UITableViewCellStyleDefault
+                                       reuseIdentifier:CellIdentifier];
+        }
+        
+        SSuggestTag* tagData  = [self.filteredTags objectAtIndex: indexPath.row];
+        
+        cell.textLabel.text = tagData.tagDesc;
+        cell.tagData = tagData;
+        
+        return cell;
     }
-    
-    SSuggestTag* tagData  = [self.filteredTags objectAtIndex: indexPath.row];
-    
-    cell.textLabel.text = tagData.tagDesc;
-    cell.tagData = tagData;
-    
-    return cell;
-    
+    else if (indexPath.section == 0)
+    {
+        static NSString* CellIdentifier = @"Cell";
+        SSuggestCell* cell = (SSuggestCell*)[tableView dequeueReusableCellWithIdentifier:CellIdentifier forIndexPath:indexPath] ;
+        
+        NSAssert([cell isKindOfClass:[SSuggestCell class]], @"invalid cell type");
+        
+        if (cell == nil) {
+            cell = [[SSuggestCell alloc] initWithStyle:UITableViewCellStyleDefault
+                                       reuseIdentifier:CellIdentifier];
+        }
+        
+        //SSuggestTag* tagData  = [self.filteredTags objectAtIndex: indexPath.row];
+        
+        cell.textLabel.text = [NSString stringWithFormat: @"+\"%@\"", self.partialSeach];
+        cell.textLabel.textColor = [UIColor redColor];
+        cell.tagData = nil;
+        
+        return cell;
+
+    }
+    return nil;
 }
 
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    return self.filteredTags.count;
+    if (section == 1)
+        return self.filteredTags.count;
+    else if (section == 0)
+        return (self.enableTagCreation && self.partialSeach.length > 2 ? 1 : 0); ///TODO: detect if the text match perfectly with an possible tag
+    
+    return 0;
+        
 }
 
+-(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
+{
+    return 2;
+}
 
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    SSuggestTag* tagSelected = [self.filteredTags objectAtIndex: indexPath.row];
-    
-    NSAssert([tagSelected isKindOfClass:[SSuggestTag class]], @"invalid tag type");
-    
-    [self addTag: tagSelected];
-    
-    [self.poc dismissPopoverAnimated:YES];
-}
+    if (indexPath.section == 1){
+        SSuggestTag* tagSelected = [self.filteredTags objectAtIndex: indexPath.row];
+        
+        NSAssert([tagSelected isKindOfClass:[SSuggestTag class]], @"invalid tag type");
+        
+        [self addTag: tagSelected];
+        
+        [self.poc dismissPopoverAnimated:YES];
 
+    }
+    else if(indexPath.section == 0)
+    {
+        //Request to add a custom tag
+        NSString* partial = self.partialSeach;
+        
+        if (partial.length > 2){
+            NSArray* filtered = [self.possibleTags
+                                 filteredArrayUsingPredicate:
+                                 [NSPredicate predicateWithFormat:@"tagDesc = %@", partial]];
+            if (filtered.count == 0)
+            {
+                CFUUIDRef theUUID = CFUUIDCreate(NULL);
+                CFStringRef string = CFUUIDCreateString(NULL, theUUID);
+                CFRelease(theUUID);
+                NSString* ident = (__bridge NSString *)string;
+                
+                
+                [self addTag:[SSuggestTag tagDataWithDesc: partial AndId:[NSString stringWithFormat: @"Custom:%@", ident]]];
+                [self.poc dismissPopoverAnimated:YES];
+            }
+        }
+    }
+}
 
 #pragma mark - paint
 
@@ -454,6 +524,24 @@ SSuggestTextDelegate* textViewDelegate;
         [self.delegate textViewDidChange:self];
 }
 
+-(void)addPossibleTagsObject:(SSuggestTag *)possibleTag
+{
+    NSArray* a = self.possibleTags;
+    NSMutableArray* larray = (NSMutableArray*) a;
+    NSAssert([larray isKindOfClass:[NSMutableArray class]], @"invalid type");
+    
+    NSPredicate* pred = [NSPredicate predicateWithFormat:@"tagId == %@", possibleTag.tagId];
+    
+    for (id object in larray) {
+        if ([pred evaluateWithObject:object]) {
+            return; //Do nothing if the id was found
+        }
+    }
+    
+    [larray addObject: possibleTag];
+
+}
+
 - (NSRange) findTagPosition:(SSuggestTag*)tag
 {
     
@@ -529,7 +617,8 @@ SSuggestTextDelegate* textViewDelegate;
     
     ///TODO: determine when it should appear
     
-    [self matchStrings: [self getSearch]];
+    self.partialSeach = [self getSearch];
+    [self matchStrings: self.partialSeach];
     [self showPopOverList];
     
     return;
@@ -544,6 +633,18 @@ SSuggestTextDelegate* textViewDelegate;
     __block BOOL result = YES;
     
     //NSString* textContent = [self.searchText stringByReplacingCharactersInRange:editingRange withString:text];
+    
+    if (!self.enableMultipleTags && self.tagList.count > 0)
+    {
+        //Cannot create tag anymore. limit reached
+        if (editingRange.length == 1 && [text isEqualToString:@""]) {
+            //It is deleting. Deleting is ok
+        }
+        else
+        {
+            return NO;
+        }
+    }
     
     NSLogD(@"shdChgTxtInRng '%@' text:%@ , loc:%d , len:%d", self.text , text , editingRange.location , editingRange.length);
     
