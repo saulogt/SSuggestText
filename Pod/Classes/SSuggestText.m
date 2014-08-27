@@ -81,7 +81,8 @@ static NSString* const dataKeySuggest = @"suggestDataKey";
         _tableVC = [[UITableViewController alloc] initWithStyle:UITableViewStylePlain];
         _tableVC.tableView.delegate = self;
         _tableVC.tableView.dataSource = self;
-        [_tableVC.tableView registerClass:[SSuggestCell class] forCellReuseIdentifier:@"Cell"];
+        [_tableVC.tableView registerClass:[SSuggestCell class] forCellReuseIdentifier:@"Cell Add"];
+        [_tableVC.tableView registerClass:[SSuggestCell class] forCellReuseIdentifier:@"Cell Use"];
     }
     return _tableVC;
 }
@@ -176,7 +177,7 @@ static NSString* const dataKeySuggest = @"suggestDataKey";
 -(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     if (indexPath.section == 1){
-        static NSString* CellIdentifier = @"Cell";
+        static NSString* CellIdentifier = @"Cell Use";
         SSuggestCell* cell = (SSuggestCell*)[tableView dequeueReusableCellWithIdentifier:CellIdentifier forIndexPath:indexPath] ;
         
         NSAssert([cell isKindOfClass:[SSuggestCell class]], @"invalid cell type");
@@ -195,7 +196,7 @@ static NSString* const dataKeySuggest = @"suggestDataKey";
     }
     else if (indexPath.section == 0)
     {
-        static NSString* CellIdentifier = @"Cell";
+        static NSString* CellIdentifier = @"Cell Add";
         SSuggestCell* cell = (SSuggestCell*)[tableView dequeueReusableCellWithIdentifier:CellIdentifier forIndexPath:indexPath] ;
         
         NSAssert([cell isKindOfClass:[SSuggestCell class]], @"invalid cell type");
