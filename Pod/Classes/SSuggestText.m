@@ -35,6 +35,8 @@
 
 @property (nonatomic) NSString* partialSeach;
 
+@property (nonatomic) BOOL hasWindow;
+
 @end
 
 static NSString* const dataKeySuggest = @"suggestDataKey";
@@ -60,6 +62,8 @@ static NSString* const dataKeySuggest = @"suggestDataKey";
 }
 
 - (void)showPopOverList {
+    if (!self.hasWindow)
+        return;
     
     if (self.filteredTags.count == 0 && !self.enableTagCreation){
         [_poc dismissPopoverAnimated:YES];
@@ -71,6 +75,11 @@ static NSString* const dataKeySuggest = @"suggestDataKey";
     }
 }
 
+-(void)didMoveToWindow
+{
+    [super didMoveToWindow];
+    self.hasWindow = YES;
+}
 
 #pragma mark - getter n setters
 
@@ -213,7 +222,7 @@ static NSString* const dataKeySuggest = @"suggestDataKey";
         cell.tagData = nil;
         
         return cell;
-
+        
     }
     return nil;
 }
@@ -226,7 +235,7 @@ static NSString* const dataKeySuggest = @"suggestDataKey";
         return (self.enableTagCreation && self.partialSeach.length > 2 ? 1 : 0); ///TODO: detect if the text match perfectly with an possible tag
     
     return 0;
-        
+    
 }
 
 -(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
@@ -244,7 +253,7 @@ static NSString* const dataKeySuggest = @"suggestDataKey";
         [self addTag: tagSelected];
         
         [self.poc dismissPopoverAnimated:YES];
-
+        
     }
     else if(indexPath.section == 0)
     {
@@ -423,9 +432,9 @@ static NSString* const dataKeySuggest = @"suggestDataKey";
     NSMutableAttributedString* attrString = [[NSMutableAttributedString alloc] init];
     
     NSMutableAttributedString *space = [[NSMutableAttributedString alloc]
-                                             initWithString: @" "
-                                             attributes:[self defaultAttributedString]];
-
+                                        initWithString: @" "
+                                        attributes:[self defaultAttributedString]];
+    
     
     for (SSuggestTag* tag in self.tagList) {
         NSMutableDictionary *attr = [[NSMutableDictionary alloc] initWithDictionary:[self defaultAttributedString]];
@@ -449,7 +458,7 @@ static NSString* const dataKeySuggest = @"suggestDataKey";
         
         if ([tag.tagId isEqualToString:newtag.tagId])
         {
-
+            
             
             return;
         }
@@ -463,60 +472,60 @@ static NSString* const dataKeySuggest = @"suggestDataKey";
     
     //self.searchText = nil;
     
-     /*
-    // Insert Plain user name text
-    NSMutableDictionary *attr = [[NSMutableDictionary alloc] initWithDictionary:[self defaultAttributedString]];
-    [attr setObject:newtag.tagId forKey:dataKeySuggest];
-    NSMutableAttributedString *nameString = [[NSMutableAttributedString alloc]
-                                             initWithString:[NSString stringWithFormat:@"%@", newtag.tagDesc]
-                                             attributes:attr];
-    
-    NSMutableAttributedString *spaceStringPefix = nil;
-    NSString *tempCommentWriting = self.text;
-    
-    //    NSLog(@"nameString:%@",nameString);
-    
-    
-    
-   
-    NSInteger cursor = self.selectedRange.location;
-    // display name
-    
-    // Add Last
-    //    NSLog(@"self.attributedText.string.length:%d",self.attributedText.string.length);
-    if (cursor >= self.attributedText.string.length-1)
-    {
-        // Add Space
-        if (tempCommentWriting.length > 0){
-            
-            NSString *prevString = [tempCommentWriting substringFromIndex:tempCommentWriting.length-1];
-            
-            if (![prevString isEqualToString:@"\n"])
-            {
-                spaceStringPefix = [[NSMutableAttributedString alloc] initWithString:@" " attributes:[self defaultAttributedString]];
-            }
-        }
-        
-        NSMutableAttributedString *conts = [[NSMutableAttributedString alloc] initWithAttributedString:self.attributedText];
-        if (spaceStringPefix)
-            [conts appendAttributedString:spaceStringPefix];
-        [conts appendAttributedString:nameString];
-        NSMutableAttributedString *afterBlank = [[NSMutableAttributedString alloc] initWithString:@" "
-                                                                                       attributes:[self defaultAttributedString]];
-        [conts appendAttributedString:afterBlank];
-        
-        //        NSLog(@"conts:%@",conts);
-        
-        self.attributedText = conts;
-        //        NSLog(@"\n\nself.attributedText:%@",self.attributedText);
-        
-    }
-    // Insert in text
-    else
-    {
-        self.attributedText = [self attributedStringInsertString:nameString at:cursor];
-    }
-    */
+    /*
+     // Insert Plain user name text
+     NSMutableDictionary *attr = [[NSMutableDictionary alloc] initWithDictionary:[self defaultAttributedString]];
+     [attr setObject:newtag.tagId forKey:dataKeySuggest];
+     NSMutableAttributedString *nameString = [[NSMutableAttributedString alloc]
+     initWithString:[NSString stringWithFormat:@"%@", newtag.tagDesc]
+     attributes:attr];
+     
+     NSMutableAttributedString *spaceStringPefix = nil;
+     NSString *tempCommentWriting = self.text;
+     
+     //    NSLog(@"nameString:%@",nameString);
+     
+     
+     
+     
+     NSInteger cursor = self.selectedRange.location;
+     // display name
+     
+     // Add Last
+     //    NSLog(@"self.attributedText.string.length:%d",self.attributedText.string.length);
+     if (cursor >= self.attributedText.string.length-1)
+     {
+     // Add Space
+     if (tempCommentWriting.length > 0){
+     
+     NSString *prevString = [tempCommentWriting substringFromIndex:tempCommentWriting.length-1];
+     
+     if (![prevString isEqualToString:@"\n"])
+     {
+     spaceStringPefix = [[NSMutableAttributedString alloc] initWithString:@" " attributes:[self defaultAttributedString]];
+     }
+     }
+     
+     NSMutableAttributedString *conts = [[NSMutableAttributedString alloc] initWithAttributedString:self.attributedText];
+     if (spaceStringPefix)
+     [conts appendAttributedString:spaceStringPefix];
+     [conts appendAttributedString:nameString];
+     NSMutableAttributedString *afterBlank = [[NSMutableAttributedString alloc] initWithString:@" "
+     attributes:[self defaultAttributedString]];
+     [conts appendAttributedString:afterBlank];
+     
+     //        NSLog(@"conts:%@",conts);
+     
+     self.attributedText = conts;
+     //        NSLog(@"\n\nself.attributedText:%@",self.attributedText);
+     
+     }
+     // Insert in text
+     else
+     {
+     self.attributedText = [self attributedStringInsertString:nameString at:cursor];
+     }
+     */
     
     [self setNeedsDisplay];
     
@@ -540,7 +549,7 @@ static NSString* const dataKeySuggest = @"suggestDataKey";
     }
     
     [larray addObject: possibleTag];
-
+    
 }
 
 - (NSRange) findTagPosition:(SSuggestTag*)tag
@@ -590,7 +599,7 @@ static NSString* const dataKeySuggest = @"suggestDataKey";
                   [NSCharacterSet whitespaceCharacterSet]] isEqualToString:@""]
                 )
             {
-               //
+                //
             }
             else
             {
@@ -600,7 +609,7 @@ static NSString* const dataKeySuggest = @"suggestDataKey";
         
     }];
     return [search stringByTrimmingCharactersInSet:
-    [NSCharacterSet whitespaceCharacterSet]] ;
+            [NSCharacterSet whitespaceCharacterSet]] ;
 }
 
 #pragma mark - UITextviewDelegate
@@ -652,12 +661,12 @@ static NSString* const dataKeySuggest = @"suggestDataKey";
     // ALl clear
     if (editingRange.location == 0 && editingRange.length == self.attributedText.string.length)
     {
-
-
+        
+        
         
         [self clearAll];
         
-
+        
         
         return YES;
     }
@@ -672,7 +681,7 @@ static NSString* const dataKeySuggest = @"suggestDataKey";
             rangeOfCheckingEditingInTag.location-=1;
             
             //            NSLog(@"<<<<< ----------- 1");
-
+            
             NSInteger totalLength = rangeOfCheckingEditingInTag.location + rangeOfCheckingEditingInTag.length;
             if (totalLength > self.attributedText.length)
             {
@@ -702,7 +711,7 @@ static NSString* const dataKeySuggest = @"suggestDataKey";
     // Deleting
     else
     {
-
+        
         editingRange.location-=1;
         if (editingRange.location == -1)
             editingRange.location = 0;
