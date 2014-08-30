@@ -120,6 +120,18 @@ static NSString* const dataKeySuggest = @"suggestDataKey";
     return _possibleTags;
 }
 
+-(void)setTagList:(NSMutableArray *)tagList
+{
+    _tagList = tagList;
+    
+    [self recreateAttributedStringByTags];
+    [self setNeedsDisplay];
+    
+    // Pass Delegate
+    if (self.delegate && [self.delegate respondsToSelector:@selector(textViewDidChange:)])
+        [self.delegate textViewDidChange:self];
+}
+
 //
 //-(NSString *)searchText
 //{
