@@ -28,18 +28,18 @@
 
 -(void)textViewDidBeginEditing:(UITextView *)textView
 {
-    NSLog(@"textViewDidBeginEditing");
+    //NSLog(@"textViewDidBeginEditing");
 }
 
 -(void)textViewDidEndEditing:(UITextView *)textView
 {
-    NSLog(@"textViewDidEndEditing");
+    //NSLog(@"textViewDidEndEditing");
     
 }
 
 -(void)textViewDidChangeSelection:(UITextView *)textView
 {
-    NSLog(@"textViewDidChangeSelection");
+    //NSLog(@"textViewDidChangeSelection");
     
 }
 

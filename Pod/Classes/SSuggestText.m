@@ -19,6 +19,8 @@
 #else
 #   define NSLogD(...)
 #endif
+#undef NSLogD
+#define NSLogD(...)
 
 @interface SSuggestText()<UITableViewDelegate, UITableViewDataSource>
 
@@ -83,6 +85,7 @@ static NSString* const dataKeySuggest = @"suggestDataKey";
 
 #pragma mark - getter n setters
 
+
 -(UITableViewController *)tableVC
 {
     if (_tableVC == nil)
@@ -130,6 +133,9 @@ static NSString* const dataKeySuggest = @"suggestDataKey";
     // Pass Delegate
     if (self.delegate && [self.delegate respondsToSelector:@selector(textViewDidChange:)])
         [self.delegate textViewDidChange:self];
+    
+    if (self.suggestDelegate)
+        [self.suggestDelegate suggestText: self newTagList: tagList];
 }
 
 //
@@ -544,6 +550,11 @@ static NSString* const dataKeySuggest = @"suggestDataKey";
     // Pass Delegate
     if (self.delegate && [self.delegate respondsToSelector:@selector(textViewDidChange:)])
         [self.delegate textViewDidChange:self];
+    
+    if (self.suggestDelegate != nil)
+    {
+        [self.suggestDelegate suggestText:self tagSelected:newtag];
+    }
 }
 
 -(void)addPossibleTagsObject:(SSuggestTag *)possibleTag
@@ -753,8 +764,13 @@ static NSString* const dataKeySuggest = @"suggestDataKey";
                 self.attributedText = [self attributedStringWithCutOutOfRange:tagRange];
                 self.selectedRange = NSMakeRange(tagRange.location, 0);
                 
-                [self.tagList removeObject:[self tagForId:[attrs objectForKey:dataKeySuggest]]];
+                SSuggestTag* tagToBeRemoved = [self tagForId:[attrs objectForKey:dataKeySuggest]];
+                
+                [self.tagList removeObject: tagToBeRemoved];
                 [self setNeedsDisplay];
+                
+                if (self.suggestDelegate != nil)
+                    [self.suggestDelegate suggestText: self tagDeleted: tagToBeRemoved];
             }
             
         }];
@@ -876,5 +892,10 @@ static NSString* const dataKeySuggest = @"suggestDataKey";
     [self clearAllAttributedStrings];
     self.attributedText = [[NSAttributedString alloc]initWithString:@"" attributes:[self defaultAttributedString]];
     [self setNeedsDisplay];
+    
+    if (self.suggestDelegate != nil)
+    {
+        [self.suggestDelegate suggestTextClearAllTags: self];
+    }
 }
 @end

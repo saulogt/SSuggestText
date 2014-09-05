@@ -9,9 +9,20 @@
 #import <Foundation/Foundation.h>
 
 @class SSuggestText;
+@class SSuggestTag;
 
 @protocol SSuggestDelegate<NSObject>
 
--(void) suggestText: (SSuggestText*) suggestText tagSelected : (NSIndexPath*) indexPath displayString: (NSString*) displayString;
+
+
+-(void) suggestText: (SSuggestText*) suggestText tagSelected : (SSuggestTag*) tag;
+
+-(void) suggestText: (SSuggestText*) suggestText tagDeleted : (SSuggestTag*) tag;
+
+-(void) suggestTextClearAllTags:(SSuggestText *)suggestText;
+
+-(void) suggestText: (SSuggestText*) suggestText newTagList: (NSArray*) tagList;
+
+
 
 @end

@@ -17,5 +17,7 @@
 +(SSuggestTag*) tagDataWithDictionary: (NSDictionary*) tagDic;
 +(SSuggestTag*) tagDataWithDesc: (NSString*) tagDesc AndId: (NSString*) tagId;
 
+
+
 @end
 

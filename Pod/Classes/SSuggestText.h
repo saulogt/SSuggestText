@@ -10,12 +10,16 @@
 #import <UIKit/UIKit.h>
 
 #import "SSuggestTag.h"
+#import "SSuggestDelegate.h"
 
 @interface SSuggestText : UITextView <UITextViewDelegate>
 
 @property (nonatomic) UIColor        *nameTagColor;
 @property (nonatomic) UIColor        *nameTagLineColor;
 @property (nonatomic) UIImage        *nameTagImage;
+
+//Delegate is notified when an relevant event happens
+@property (nonatomic, assign) NSObject<SSuggestDelegate>* suggestDelegate;
 
 //This array contains all tags currently selected in the component
 //The inner element type is SSuggestTag
@@ -41,6 +45,7 @@
 
 //Helper function that adds a possible tag in the database individually skiping duplicated objects
 -(void)addPossibleTagsObject:(SSuggestTag*)possibleTag;
+
 
 
 #pragma mark - internal usage

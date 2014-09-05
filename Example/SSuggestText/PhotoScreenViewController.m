@@ -9,11 +9,13 @@
 #import "PhotoScreenViewController.h"
 #import <SSuggestText.h>
 
-@interface PhotoScreenViewController ()
+@interface PhotoScreenViewController ()<SSuggestDelegate>
+
 @property (weak, nonatomic) IBOutlet SSuggestText *tag1;
 @property (weak, nonatomic) IBOutlet SSuggestText *tag2;
 @property (weak, nonatomic) IBOutlet SSuggestText *tag3;
 @property (weak, nonatomic) IBOutlet SSuggestText *tag4;
+
 
 @end
 
@@ -35,7 +37,7 @@
 
     //id s = self.tag1.possibleTags;
 
-    
+    self.tag1.enableMultipleTags = YES;
     [self.tag1 addPossibleTagsObject:[SSuggestTag tagDataWithDesc:@"Scene 1" AndId:@"1"]];
     [self.tag1 addPossibleTagsObject:[SSuggestTag tagDataWithDesc:@"Scene - Home" AndId:@"2"]];
     [self.tag1 addPossibleTagsObject:[SSuggestTag tagDataWithDesc:@"Shopping" AndId:@"3"]];
@@ -65,8 +67,31 @@
                                ];
     
     
+    self.tag1.suggestDelegate = self;
     
 }
+
+-(void)suggestText:(SSuggestText *)suggestText tagSelected:(SSuggestTag *)tag
+{
+    NSLog(@"tagSelected: %@", tag);
+}
+
+
+-(void)suggestText:(SSuggestText *)suggestText tagDeleted:(SSuggestTag *)tag
+{
+    NSLog(@"tagDeleted: %@", tag);
+}
+
+-(void)suggestText:(SSuggestText *)suggestText newTagList:(NSArray *)tagList
+{
+    NSLog(@"newTagList: %@", tagList);
+}
+
+-(void)suggestTextClearAllTags:(SSuggestText *)suggestText
+{
+    NSLog(@"clearAll");
+}
+
 
 - (void)didReceiveMemoryWarning
 {

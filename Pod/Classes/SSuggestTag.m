@@ -43,4 +43,9 @@
 
 }
 
+-(NSString *)description
+{
+    return [NSString stringWithFormat:@"SSuggestTag id: '%@' descr: '%@'", self.tagId, self.tagDesc];
+}
+
 @end
