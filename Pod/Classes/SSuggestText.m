@@ -131,9 +131,11 @@ static NSString* const dataKeySuggest = @"suggestDataKey";
     [self setNeedsDisplay];
     
     // Pass Delegate
+    /*
     if (self.delegate && [self.delegate respondsToSelector:@selector(textViewDidChange:)])
         [self.delegate textViewDidChange:self];
-    
+    */
+     
     if (self.suggestDelegate)
         [self.suggestDelegate suggestText: self newTagList: tagList];
 }

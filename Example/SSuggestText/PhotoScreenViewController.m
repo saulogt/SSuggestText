@@ -67,7 +67,16 @@
                                ];
     
     
-    self.tag1.suggestDelegate = self;
+  
+    
+
+    self.tag1.tagList = [@[] mutableCopy];
+    self.tag2.tagList = [@[] mutableCopy];
+    
+    self.tag4.tagList = [@[] mutableCopy];
+    
+        self.tag4.suggestDelegate = self;
+  
     
 }
 
