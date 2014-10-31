@@ -28,11 +28,14 @@
 
 -(void)textViewDidBeginEditing:(UITextView *)textView
 {
-    //NSLog(@"textViewDidBeginEditing");
+    NSAssert([textView isKindOfClass:[SSuggestText class]], @"textView is invalid");
+    return [(SSuggestText*)textView textViewDidBeginEditing:textView];
 }
 
 -(void)textViewDidEndEditing:(UITextView *)textView
 {
+    NSAssert([textView isKindOfClass:[SSuggestText class]], @"textView is invalid");
+    [(SSuggestText*)textView textViewDidEndEditing: textView ];
     //NSLog(@"textViewDidEndEditing");
     
 }

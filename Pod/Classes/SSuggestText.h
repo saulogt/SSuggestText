@@ -35,6 +35,8 @@
 //This option will allow a tag creation by typing
 @property (nonatomic) BOOL enableTagCreation;
 
+
+@property (nonatomic) BOOL keepSuggestPopoverOpen;
 // Add new tag to the selected ones
 - (void) addTag:(SSuggestTag*)tag;
 

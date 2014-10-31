@@ -9,7 +9,7 @@
 
 Pod::Spec.new do |s|
   s.name             = "SSuggestText"
-  s.version          = "0.1.1"
+  s.version          = "0.1.2.Beta 1"
   s.summary          = "SSuggestText shows suggest on typing and creates tag based on configuraton."
   s.description      = <<-DESC
                        SSuggestText full description TBD...

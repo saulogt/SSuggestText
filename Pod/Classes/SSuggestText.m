@@ -22,7 +22,7 @@
 #undef NSLogD
 #define NSLogD(...)
 
-@interface SSuggestText()<UITableViewDelegate, UITableViewDataSource>
+@interface SSuggestText()<UITableViewDelegate, UITableViewDataSource, UIPopoverControllerDelegate>
 
 @property (nonatomic) NSMutableArray *tagViews;
 
@@ -52,11 +52,16 @@ static NSString* const dataKeySuggest = @"suggestDataKey";
 
 - (void)matchStrings:(NSString *)letters {
     if (self.possibleTags.count > 0) {
-        
-        self.filteredTags = [self.possibleTags
+        if (self.keepSuggestPopoverOpen && [letters isEqualToString:@""])
+        {
+            self.filteredTags = [self.possibleTags copy];
+        }
+        else
+        {
+            self.filteredTags = [self.possibleTags
                              filteredArrayUsingPredicate:
                              [NSPredicate predicateWithFormat:@"tagDesc contains[cd] %@", letters]];
-        
+        }
         [self.tableVC.tableView reloadData];
     }
     
@@ -68,7 +73,18 @@ static NSString* const dataKeySuggest = @"suggestDataKey";
         return;
     
     if (self.filteredTags.count == 0 && !self.enableTagCreation){
-        [_poc dismissPopoverAnimated:YES];
+        if(self.keepSuggestPopoverOpen)
+        {
+            ////////////////////////////////////////////
+            [_poc presentPopoverFromRect:self.frame
+                                  inView:self.superview
+                permittedArrowDirections:UIPopoverArrowDirectionUp
+                                animated:YES];
+        }
+        else
+        {
+            [_poc dismissPopoverAnimated:YES];
+        }
     } else if (!_poc.isPopoverVisible) {
         [_poc presentPopoverFromRect:self.frame
                               inView:self.superview
@@ -93,7 +109,7 @@ static NSString* const dataKeySuggest = @"suggestDataKey";
         _tableVC = [[UITableViewController alloc] initWithStyle:UITableViewStylePlain];
         _tableVC.tableView.delegate = self;
         _tableVC.tableView.dataSource = self;
-        [_tableVC.tableView registerClass:[SSuggestCell class] forCellReuseIdentifier:@"Cell Add"];
+        [_tableVC.tableView registerClass:[SSuggestCell class] forCellReuseIdentifier:@"Cell Red"];
         [_tableVC.tableView registerClass:[SSuggestCell class] forCellReuseIdentifier:@"Cell Use"];
     }
     return _tableVC;
@@ -161,7 +177,7 @@ static NSString* const dataKeySuggest = @"suggestDataKey";
     self.autocorrectionType = UITextAutocorrectionTypeNo;
     self.poc =
     [[UIPopoverController alloc] initWithContentViewController:self.tableVC];
-    
+    self.poc.delegate = self;
     
     // Some custom apperances
     self.nameTagImage = [[UIImage imageNamed:@"tagImage"] stretchableImageWithLeftCapWidth:4 topCapHeight:4];
@@ -225,7 +241,7 @@ static NSString* const dataKeySuggest = @"suggestDataKey";
     }
     else if (indexPath.section == 0)
     {
-        static NSString* CellIdentifier = @"Cell Add";
+        static NSString* CellIdentifier = @"Cell Red";
         SSuggestCell* cell = (SSuggestCell*)[tableView dequeueReusableCellWithIdentifier:CellIdentifier forIndexPath:indexPath] ;
         
         NSAssert([cell isKindOfClass:[SSuggestCell class]], @"invalid cell type");
@@ -244,15 +260,40 @@ static NSString* const dataKeySuggest = @"suggestDataKey";
         return cell;
         
     }
+    else if (indexPath.section == 2)
+    {
+        static NSString* CellIdentifier = @"Cell Red";
+        SSuggestCell* cell = (SSuggestCell*)[tableView dequeueReusableCellWithIdentifier:CellIdentifier forIndexPath:indexPath] ;
+        
+        NSAssert([cell isKindOfClass:[SSuggestCell class]], @"invalid cell type");
+        
+        if (cell == nil) {
+            cell = [[SSuggestCell alloc] initWithStyle:UITableViewCellStyleDefault
+                                       reuseIdentifier:CellIdentifier];
+        }
+        
+        //SSuggestTag* tagData  = [self.filteredTags objectAtIndex: indexPath.row];
+        
+        cell.textLabel.text = [NSString stringWithFormat: @"Opção inexistente!"];//, self.partialSeach];
+        cell.textLabel.textColor = [UIColor redColor];
+        cell.tagData = nil;
+        
+        return cell;
+
+    }
     return nil;
 }
 
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    if (section == 1)
+    if (section == 2){
+        if (self.filteredTags.count == 0)
+            return (self.keepSuggestPopoverOpen && self.partialSeach.length > 0 ? 1 : 0);
+    }
+    else if (section == 1)
         return self.filteredTags.count;
     else if (section == 0)
-        return (self.enableTagCreation && self.partialSeach.length > 2 ? 1 : 0); ///TODO: detect if the text match perfectly with an possible tag
+        return (self.enableTagCreation && self.partialSeach.length > 2 ? 1 : 0);
     
     return 0;
     
@@ -260,7 +301,7 @@ static NSString* const dataKeySuggest = @"suggestDataKey";
 
 -(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
-    return 2;
+    return 3;
 }
 
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
@@ -296,6 +337,10 @@ static NSString* const dataKeySuggest = @"suggestDataKey";
                 [self.poc dismissPopoverAnimated:YES];
             }
         }
+    }
+    else if (indexPath.section == 2)
+    {
+        [self endEditing:NO];
     }
 }
 
@@ -660,6 +705,23 @@ static NSString* const dataKeySuggest = @"suggestDataKey";
     
 }
 
+-(void)textViewDidEndEditing:(UITextView *)textView
+{
+    [self recreateAttributedStringByTags];
+}
+
+-(void)textViewDidBeginEditing:(UITextView *)textView
+{
+    if (textView != self)
+        return;
+    
+    if (self.keepSuggestPopoverOpen)
+    {
+        [self matchStrings: @""];
+        [self showPopOverList];
+    }
+}
+
 
 
 - (BOOL) shouldChangeTextInRange:(NSRange)editingRange replacementText:(NSString *)text
@@ -781,6 +843,14 @@ static NSString* const dataKeySuggest = @"suggestDataKey";
         
     }
     
+}
+
+#pragma mark - UIPopoverControllerDelegate
+
+-(void)popoverControllerDidDismissPopover:(UIPopoverController *)popoverController
+{
+    //[self recreateAttributedStringByTags];
+    [self endEditing: NO];
 }
 
 

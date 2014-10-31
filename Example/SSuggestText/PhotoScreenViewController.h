@@ -7,7 +7,13 @@
 //
 
 #import <UIKit/UIKit.h>
+#import <SSuggestText/SSuggestText.h>
 
 @interface PhotoScreenViewController : UIViewController
+
+@property (weak, nonatomic) IBOutlet SSuggestText *tag1;
+@property (weak, nonatomic) IBOutlet SSuggestText *tag2;
+@property (weak, nonatomic) IBOutlet SSuggestText *tag3;
+@property (weak, nonatomic) IBOutlet SSuggestText *tag4;
 
 @end

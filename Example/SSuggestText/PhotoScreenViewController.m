@@ -11,11 +11,6 @@
 
 @interface PhotoScreenViewController ()<SSuggestDelegate>
 
-@property (weak, nonatomic) IBOutlet SSuggestText *tag1;
-@property (weak, nonatomic) IBOutlet SSuggestText *tag2;
-@property (weak, nonatomic) IBOutlet SSuggestText *tag3;
-@property (weak, nonatomic) IBOutlet SSuggestText *tag4;
-
 
 @end
 
@@ -54,6 +49,8 @@
                                @{@"id": @"7", @"desc": @"His Wife"},
                                ];
     
+    self.tag2.keepSuggestPopoverOpen = YES;
+    
     self.tag3.enableMultipleTags = YES;
     self.tag3.possibleTags = @[@{@"id": @"1", @"desc": @"Clothing 1"},
                                @{@"id": @"2", @"desc": @"Clothing 2"}
@@ -63,19 +60,21 @@
     self.tag4.enableMultipleTags = YES;
     self.tag4.enableTagCreation = YES;
     self.tag4.possibleTags = @[@{@"id": @"1", @"desc": @"Party"},
-                               @{@"id": @"2", @"desc": @"Restaurant"}
+                               @{@"id": @"2", @"desc": @"Restaurant"},
+                               @{@"id": @"2", @"desc": @"Square"},
+                               @{@"id": @"2", @"desc": @"Bar"}
                                ];
     
     
   
     
 
-    self.tag1.tagList = [@[] mutableCopy];
-    self.tag2.tagList = [@[] mutableCopy];
+    self.tag1.tagList = [@[self.tag2.possibleTags[0]] mutableCopy];
+    self.tag2.tagList = [@[self.tag2.possibleTags[1]] mutableCopy];
     
-    self.tag4.tagList = [@[] mutableCopy];
-    
-        self.tag4.suggestDelegate = self;
+    self.tag4.tagList = [@[self.tag4.possibleTags[0], self.tag4.possibleTags[1]] mutableCopy];
+    self.tag4.enableMultipleTags = YES;
+    self.tag4.suggestDelegate = self;
   
     
 }
