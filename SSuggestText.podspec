@@ -12,7 +12,7 @@ Pod::Spec.new do |s|
   s.version          = "0.1.3"
   s.summary          = "SSuggestText shows suggest on typing and creates tag based on configuraton."
   s.description      = <<-DESC
-                       SSuggestText full description TBD...
+                       SSuggestText works like a suggest combobox fery similar to those used on websites... If you boss or client requires you to use something like it. It can be a good option
                        DESC
   s.homepage         = "https://github.com/saulogt/SSuggestText"
   # s.screenshots     = "www.example.com/screenshots_1", "www.example.com/screenshots_2"
