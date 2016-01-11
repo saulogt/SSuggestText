@@ -816,6 +816,8 @@ static NSString* const dataKeySuggest = @"suggestDataKey";
             
         }
         
+        __block BOOL tagRemoved = NO;
+        
         [self.attributedText enumerateAttributesInRange:editingRange options:0 usingBlock:^(NSDictionary *attrs, NSRange range, BOOL *stop) {
             
             if ([attrs objectForKey:dataKeySuggest] && [self tagForId:[attrs objectForKey:dataKeySuggest]])
@@ -831,16 +833,22 @@ static NSString* const dataKeySuggest = @"suggestDataKey";
                 SSuggestTag* tagToBeRemoved = [self tagForId:[attrs objectForKey:dataKeySuggest]];
                 
                 [self.tagList removeObject: tagToBeRemoved];
+                tagRemoved = YES;
                 [self setNeedsDisplay];
                 
-                if (self.suggestDelegate != nil)
+                if (self.suggestDelegate != nil){
                     [self.suggestDelegate suggestText: self tagDeleted: tagToBeRemoved];
+                                    }
             }
-            
         }];
         
-        return YES;
-        
+        if (tagRemoved){
+            [self recreateAttributedStringByTags];
+            return NO;
+        }
+        else {
+            return YES;
+        }
     }
     
 }
