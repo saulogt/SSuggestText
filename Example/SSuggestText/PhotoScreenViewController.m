@@ -7,7 +7,7 @@
 //
 
 #import "PhotoScreenViewController.h"
-#import <SSuggestText.h>
+#import "SSuggestText.h"
 
 @interface PhotoScreenViewController ()<SSuggestDelegate>
 

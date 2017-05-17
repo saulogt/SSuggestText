@@ -1,12 +1,18 @@
-target 'SSuggestText', :exclusive => true do
-  pod "SSuggestText", :path => "../"
-end
+use_frameworks!
 
-target 'Tests', :exclusive => true do
+target 'SSuggestText' do
   pod "SSuggestText", :path => "../"
 
-  pod 'Specta'#,  :git => "https://github.com/specta/specta.git" #, '~> 0.3.0.beta1'
-  pod 'Expecta'
-  #pod 'FBSnapshotTestCase'
-  pod 'Expecta+Snapshots'
+  	target 'Tests' do
+  		inherit! :search_paths
+  		pod "SSuggestText", :path => "../"
+
+  		pod 'Specta'#,  :git => "https://github.com/specta/specta.git" #, '~> 0.3.0.beta1'
+  		pod 'Expecta'
+  		#pod 'FBSnapshotTestCase'
+  		pod 'Expecta+Snapshots'
+	end
+
 end
+
+
